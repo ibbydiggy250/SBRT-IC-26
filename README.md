@@ -14,7 +14,7 @@ The two talk over Wi-Fi, so **the laptop and the Pico must be on the same networ
 | File | Runs on | What it does |
 |---|---|---|
 | `pico/main.py` | Pico | Wi-Fi, receiving commands, safety stop, status reports. Starts by itself at power-up. |
-| `pico/robot.py` | Pico | Pin numbers for each PCB, motor directions, servo range. |
+| `pico/robot.py` | Pico | Pin numbers, motor directions, servo range. |
 | `pico/config.json` | Pico | Wi-Fi name, Wi-Fi password and the robot's hostname. |
 | `pico/test_motors.py` | Pico | Optional wiring check. Read its header before using it. |
 | `laptop/main.py` | Laptop | Controls, the Pico's IP address, and the status monitor. |
@@ -103,22 +103,9 @@ A Pico W has no power light. Its LED is controlled by code, so a blank Pico, or 
 
 The Shell at the bottom should show a line starting `MicroPython` and mentioning `Pico W`, followed by a `>>>` prompt. You can also change the interpreter and port by clicking the text in the bottom-right corner of the Thonny window.
 
-### 3. Set the board and the hostname
+### 3. Set the hostname
 
-Edit these two files on your computer before uploading.
-
-**`pico/robot.py`: choose your PCB.** Near the top:
-
-```python
-BOARD = "vincent"
-```
-
-- `"raychel"` is the 2026 PCB in the schematic.
-- `"vincent"` is the earlier board.
-
-The two boards use completely different pins. With the wrong setting, most of the robot stays dead; a typical sign is only one motor responding.
-
-**`pico/config.json`: name your robot.** Change `HOSTNAME` to something unique to your team. `SSID` and `PASSWORD` are the Wi-Fi network the Pico joins; change them only if you are testing on a different network. The Pico W can only use 2.4 GHz Wi-Fi.
+Before uploading, open `pico/config.json` on your computer and change `HOSTNAME` to something unique to your team. `SSID` and `PASSWORD` are the Wi-Fi network the Pico joins; change them only if you are testing on a different network. The Pico W can only use 2.4 GHz Wi-Fi.
 
 ### 4. Upload the code
 
@@ -195,9 +182,7 @@ This has only been run on Windows. On Mac and Linux, the `keyboard` package norm
 2. With the battery disconnected, seat the Pico in the PCB the right way round.
 3. Put the robot on a stand.
 4. Connect the battery and make sure the robot's power switch is on.
-5. Wait for Wi-Fi. `main.py` starts by itself at power-up; nothing needs to be pressed.
-   - The Pico's own LED turns on when the program starts.
-   - On the `raychel` board, the PCB's LED should turn on once Wi-Fi is connected (pin GP22 per the schematic; not yet seen working).
+5. Wait about ten seconds for Wi-Fi. `main.py` starts by itself at power-up; nothing needs to be pressed. The Pico's own LED turns on when the program starts.
 6. Run `python main.py` in the `laptop` folder again and wait for CONNECTED.
 
 Check `Chip temp` on the monitor. It should read roughly 25 to 40 C. A wild value such as 200 C may mean the Pico's power supply is wrong on that board; disconnect the battery and investigate.
@@ -232,7 +217,7 @@ Motor 1 (front left)     Motor 4 (front right)
 Motor 2 (rear left)      Motor 3 (rear right)
 ```
 
-1. **Hold W.** All four wheels should turn forward. For each wheel that turns backward, open `pico/robot.py`, find your board's table, and change the last number on that wheel's row from `1` to `-1` (or back):
+1. **Hold W.** All four wheels should turn forward. For each wheel that turns backward, open `pico/robot.py`, find that wheel's row (the ones in use look like the example below), and change its last number from `1` to `-1` (or back):
 
    ```python
    "fl": (4, 3, 2, -1),     # M1
@@ -250,8 +235,8 @@ If W is correct but step 3 or 4 is wrong, two motors are plugged into each other
 
 ## What has and has not been tested
 
-- **`vincent` board:** driving in all directions was checked on one test robot, and its direction settings are tuned for that robot. Servos were never confirmed working there; the servo pins (GP28 and GP0) come from the organisers' code for that board and have not been verified.
-- **`raychel` board:** the pin numbers come from the schematic and have **not** driven real hardware yet. Expect to do the wheel-direction check.
+- **Driving:** checked in all directions on one robot, and the wheel directions are tuned for that robot. Another robot may need the wheel-direction check above.
+- **Servos:** never confirmed working. The servo pins (GP28 and GP0) come from the organisers' code and have not been verified.
 - **Xbox controller:** written but not tested with a real controller.
 
 ## Troubleshooting
@@ -276,9 +261,6 @@ Check these in order:
 
 **`AttributeError: 'NoneType' object has no attribute 'on'` in Thonny.**
 The Pico has a new `robot.py` with an old `main.py`. Upload both from the `pico` folder, and close any stale `[ main.py ]` tab.
-
-**Only one motor responds, or only to some keys.**
-`BOARD` in `robot.py` is set to the wrong PCB.
 
 **The monitor shows DRIVING but nothing moves.**
 The commands are arriving, so this is power or wiring. Check the robot's power switch, the battery charge, and that the Pico is seated correctly. Motors run from battery voltage and servos from a separate 5 V supply, so one can work without the other.
