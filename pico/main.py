@@ -140,7 +140,7 @@ def main():
     machine.Pin("LED", machine.Pin.OUT).on()   # onboard LED: the program is running
 
     wlan = connect_wifi()
-    robot.led.on()                             # PCB LED: Wi-Fi is up
+    robot.set_led(True)                        # PCB LED: Wi-Fi is up
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     sock.bind(("0.0.0.0", PORT))

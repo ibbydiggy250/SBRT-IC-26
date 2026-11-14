@@ -1,22 +1,44 @@
-# Hardware for the IC 2026 PCB: four motors, two servos and the status LED.
+# Hardware for the competition PCBs: four motors, two servos and the status LED.
 # Importing this file sets the pins up; it never touches Wi-Fi.
 
 import machine
 
 # ---------- TUNING ----------
-# corner: (IN1 pin, IN2 pin, PWM pin, direction)
+# Which PCB this Pico is plugged into. The two boards use completely different pins,
+# so the wrong choice leaves most of the robot dead.
+#   "raychel" = the 2026 PCB in the schematic
+#   "vincent" = the earlier board
+BOARD = "vincent"
+
+# motors: corner: (IN1 pin, IN2 pin, PWM pin, direction)
 # fl = front left, rl = rear left, rr = rear right, fr = front right.
 # If a wheel spins backwards, change its direction to -1.
 # If a motor is at a different corner than listed, swap the rows' pin numbers.
-MOTOR_PINS = {
-    "fl": (12, 13, 14, 1),   # M1 on the PCB
-    "rl": (10, 11, 15, 1),   # M2
-    "rr": (17, 18, 16, 1),   # M3
-    "fr": (20, 21, 19, 1),   # M4
+BOARDS = {
+    "raychel": {
+        "motors": {
+            "fl": (12, 13, 14, 1),   # M1 on the PCB
+            "rl": (10, 11, 15, 1),   # M2
+            "rr": (17, 18, 16, 1),   # M3
+            "fr": (20, 21, 19, 1),   # M4
+        },
+        "servos": {"j1": 4, "j2": 5},
+        "standby": (9,),             # one pin wakes both motor drivers
+        "led": 22,                   # LED D1 on the PCB
+    },
+    "vincent": {
+        "motors": {
+            "fl": (4, 3, 2, -1),     # M1
+            "rl": (6, 7, 8, 1),      # M2
+            "rr": (20, 19, 15, -1),  # M3
+            "fr": (22, 26, 27, 1),   # M4
+        },
+        "servos": {"j1": 28, "j2": 0},
+        "standby": (5, 21),          # one pin per motor driver
+        "led": None,                 # no status LED pin known for this board
+    },
 }
-SERVO_PINS = {"j1": 4, "j2": 5}
-STANDBY_PIN = 9              # one pin wakes both motor drivers
-LED_PIN = 22                 # LED D1 on the PCB
+PINS = BOARDS[BOARD]
 
 MOTOR_PWM_HZ = 1000
 SERVO_MIN_US = 600           # servo pulse at -1.0
@@ -66,13 +88,22 @@ class Servo:
         self.pwm.duty_ns(self.pulse_us * 1000)
 
 
-standby = machine.Pin(STANDBY_PIN, machine.Pin.OUT)
-led = machine.Pin(LED_PIN, machine.Pin.OUT)
-led.off()
+standby = [machine.Pin(pin, machine.Pin.OUT) for pin in PINS["standby"]]
+led = None if PINS["led"] is None else machine.Pin(PINS["led"], machine.Pin.OUT)
 
-motors = {corner: Motor(*pins) for corner, pins in MOTOR_PINS.items()}
-servos = {name: Servo(pin) for name, pin in SERVO_PINS.items()}
-standby.on()
+motors = {corner: Motor(*pins) for corner, pins in PINS["motors"].items()}
+servos = {name: Servo(pin) for name, pin in PINS["servos"].items()}
+for pin in standby:
+    pin.on()
+
+
+def set_led(on):
+    """Switch the PCB's status LED, on boards that have one."""
+    if led is not None:
+        led.value(1 if on else 0)
+
+
+set_led(False)
 
 
 def drive(x, y, rot):
@@ -97,5 +128,6 @@ def is_moving():
 def shutdown():
     """Stop the wheels and put the motor drivers to sleep."""
     stop()
-    standby.off()
-    led.off()
+    for pin in standby:
+        pin.off()
+    set_led(False)

@@ -1,9 +1,13 @@
-# Wiring check: spins each wheel forward in turn. Open this file on the Pico in
-# Thonny and press Run, with the robot on a stand and the wheels off the ground.
+# Wiring check: spins each wheel forward in turn, with the robot on a stand and
+# the wheels off the ground.
+#
+# Running this from Thonny needs USB and the battery connected at the same time.
+# Do NOT do that unless whoever built your PCB has confirmed it is safe. The
+# README describes a wheel check from the laptop that needs no USB.
 #
 # For each corner it names, the wheel at that corner should turn the way that
 # would move the robot FORWARD. If it turns backwards, or a different wheel
-# turns, fix MOTOR_PINS in robot.py as described there.
+# turns, fix your board's motor pins in robot.py as described there.
 
 import time
 

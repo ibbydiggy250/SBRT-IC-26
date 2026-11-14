@@ -12,7 +12,8 @@ import pygame
 import keyboard
 
 #Pico IP address (from Thonny output)
-SERVER_IP = "" # you might be able to use hostname, but its unreliable
+# Original Pico: 192.168.1.25. Test Pico: 192.168.1.183. Newest Pico: 192.168.1.39.
+SERVER_IP = "192.168.1.39" # you might be able to use hostname, but its unreliable
 SERVER_PORT = 5005
 POLL_INTERVAL = 0.02  # how often the controller is read (50 Hz)
 
